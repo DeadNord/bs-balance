@@ -22,31 +22,41 @@ export class BalanceService {
       await this.balanceModel.create({
         id: createTransDto.id,
         balance: createTransDto.sum,
+        transactions: [
+          {
+            from: 'System',
+            to: createTransDto.id,
+            value: createTransDto.sum,
+            date: new Date(),
+            comment:
+              createTransDto.comment === ''
+                ? createTransDto.sum < 0
+                  ? 'Outcome'
+                  : 'Income'
+                : createTransDto.comment,
+          },
+        ],
       });
 
-      await this.balanceModel.findOneAndUpdate(
-        { id: createTransDto.id },
-        {
-          transactions: [
-            {
-              from: 'System',
-
-              to: createTransDto.id,
-
-              value: createTransDto.sum,
-
-              date: new Date(),
-
-              comment:
-                createTransDto.comment === ''
-                  ? createTransDto.sum < 0
-                    ? 'Outcome'
-                    : 'Income'
-                  : createTransDto.comment,
-            },
-          ],
-        },
-      );
+      // await this.balanceModel.findOneAndUpdate(
+      //   { id: createTransDto.id },
+      //   {
+      //     transactions: [
+      //       {
+      //         from: 'System',
+      //         to: createTransDto.id,
+      //         value: createTransDto.sum,
+      //         date: new Date(),
+      //         comment:
+      //           createTransDto.comment === ''
+      //             ? createTransDto.sum < 0
+      //               ? 'Outcome'
+      //               : 'Income'
+      //             : createTransDto.comment,
+      //       },
+      //     ],
+      //   },
+      // );
       return;
     }
 
@@ -77,7 +87,7 @@ export class BalanceService {
       },
     );
 
-    return 'This action adds a new balance';
+    return;
   }
 
   async createC2CTrans(createC2CTransDto: CreateC2CTransDto) {
