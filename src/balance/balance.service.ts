@@ -151,11 +151,16 @@ export class BalanceService {
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     }
-    if (currency !== undefined || currency !== null) {
-      const courses = await getCoursesService();
-      const targetCourses = courses.find(i => i.ccy === currency);
 
-      const balance = user.balance / targetCourses.buy;
+    if (currency !== undefined) {
+      const res = await getCoursesService('USD', currency);
+      if (res === 'ERR_BAD_REQUEST') {
+        throw new BadRequestException(`Currency ${currency} not found`);
+      }
+
+      const courses = res.exchange_rates[currency];
+
+      const balance = user.balance * courses;
 
       return {
         balance: balance,
@@ -165,7 +170,7 @@ export class BalanceService {
 
     return {
       balance: user.balance,
-      currency: 'UAH',
+      currency: 'USD',
     };
   }
 

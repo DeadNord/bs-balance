@@ -28,8 +28,6 @@ export class BalanceController {
     @Param('id') id: string,
     @Query('currency') currency: string,
   ) {
-    // console.log(id, currency);
-
     return this.balanceService.getBalance(id, currency);
   }
 

@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-export const getCoursesService = async () => {
+export const getCoursesService = async (base: string, currency: string) => {
   const courses = await axios
-    .get('https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11')
+    .get(
+      `https://exchange-rates.abstractapi.com/v1/live/?api_key=10911728664e4bc49031b27ca146ca51&base=${base}&target=${currency}`,
+    )
     .then(res => res.data)
-    .catch(function (error) {
-      // handle error
-      console.log(error);
+    .catch(error => {
+      //   console.log(error);
+      return error.code;
     });
   return courses;
 };
