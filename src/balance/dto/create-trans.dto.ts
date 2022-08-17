@@ -5,16 +5,6 @@ export class CreateTransDto {
   @ApiProperty({
     type: String,
     required: true,
-    description: 'From who User ID',
-    default: 'andj283wofj3ff53',
-  })
-  @IsNotEmpty()
-  @IsString()
-  from: string;
-
-  @ApiProperty({
-    type: String,
-    required: true,
     description: 'User ID',
     default: '62cd5a61408352bb8b7c1b79',
   })
