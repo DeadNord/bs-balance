@@ -16,7 +16,7 @@ class Balance {
   @Prop(
     raw([
       {
-        id: { type: String, required: true, default: v4() },
+        // id: { type: String, required: true, default: v4() },
 
         from: { type: String, required: true },
 
