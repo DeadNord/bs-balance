@@ -5,6 +5,16 @@ export class CreateC2CTransDto {
   @ApiProperty({
     type: String,
     required: true,
+    description: 'From who User ID',
+    default: 'andj283wofj3ff53',
+  })
+  @IsNotEmpty()
+  @IsString()
+  from: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
     description: 'User ID',
     default: '12m91d829424d',
   })
