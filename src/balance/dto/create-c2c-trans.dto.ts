@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateC2CTransDto {
+class CreateC2CTransDto {
   @ApiProperty({
     type: String,
     required: true,
@@ -31,12 +31,14 @@ export class CreateC2CTransDto {
   @IsNotEmpty()
   sum: number;
 
-  @ApiProperty({
-    type: String,
-    // required: true,
-    description: 'Comment Trant',
-    default: '',
-  })
-  @IsString()
-  comment: string;
+  // @ApiProperty({
+  //   type: String,
+  //   required: false,
+  //   description: 'Comment Trans',
+  // })
+  // @IsString()
+  // @IsOptional()
+  // comment: string;
 }
+
+export { CreateC2CTransDto };
