@@ -1,7 +1,6 @@
-import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document } from 'mongoose';
-import { v4 } from 'uuid';
 
 type balanceDocument = Balance & Document;
 
@@ -12,25 +11,6 @@ class Balance {
 
   @Prop({ required: true })
   balance: number;
-
-  @Prop(
-    raw([
-      {
-        // id: { type: String, required: true, default: v4() },
-
-        from: { type: String, required: true },
-
-        to: { type: String, required: true },
-
-        value: { type: Number, required: true },
-
-        date: { type: String, required: true },
-
-        comment: { type: String },
-      },
-    ]),
-  )
-  transactions: Record<string, any>;
 }
 const balanceSchema = SchemaFactory.createForClass(Balance);
 

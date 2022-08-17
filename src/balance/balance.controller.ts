@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BalanceService } from './balance.service';
 import { CreateC2CTransDto } from './dto/create-c2c-trans.dto copy';
 import { CreateTransDto } from './dto/create-trans.dto';
+import { PaginateDto } from './dto/paginate.dto';
 
 @ApiTags('balance')
 @Controller('balance')
@@ -34,10 +35,7 @@ export class BalanceController {
 
   @ApiOperation({ summary: 'get All User Transactions' })
   @Get('/transactions:id')
-  async getTrans(
-    @Param('id') id: string,
-    // @Query() params: PaginateDto
-  ) {
-    return this.balanceService.getTrans(id);
+  async getTrans(@Param('id') id: string, @Query() params: PaginateDto) {
+    return this.balanceService.getTrans(id, params.page, params.limit);
   }
 }

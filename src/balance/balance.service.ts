@@ -8,14 +8,18 @@ import { log } from 'console';
 import { Model } from 'mongoose';
 import { CreateC2CTransDto } from './dto/create-c2c-trans.dto copy';
 import { CreateTransDto } from './dto/create-trans.dto';
+import { PaginateDto } from './dto/paginate.dto';
 import { getCoursesService } from './helpers/getCoursesService';
 import { Balance, balanceDocument } from './schemas/balance.schema';
+import { Transaction, transactionDocument } from './schemas/transactons.schema';
 
 @Injectable()
 export class BalanceService {
   constructor(
     @InjectModel(Balance.name)
     private balanceModel: Model<balanceDocument>,
+    @InjectModel(Transaction.name)
+    private transactionModel: Model<transactionDocument>,
   ) {}
 
   async createTrans(createTransDto: CreateTransDto) {
@@ -28,22 +32,21 @@ export class BalanceService {
       await this.balanceModel.create({
         id: createTransDto.id,
         balance: createTransDto.sum,
-        transactions: [
-          {
-            from: 'System',
-            to: createTransDto.id,
-            value: createTransDto.sum,
-            date: new Date(),
-            comment:
-              createTransDto.comment === ''
-                ? createTransDto.sum < 0
-                  ? 'Outcome'
-                  : 'Income'
-                : createTransDto.comment,
-          },
-        ],
       });
 
+      await this.transactionModel.create({
+        from: 'System',
+        to: createTransDto.id,
+        value: createTransDto.sum,
+        balance: createTransDto.sum,
+        date: new Date(),
+        comment:
+          createTransDto.comment === ''
+            ? createTransDto.sum < 0
+              ? 'Outcome'
+              : 'Income'
+            : createTransDto.comment,
+      });
       return;
     }
 
@@ -55,24 +58,21 @@ export class BalanceService {
       { id: createTransDto.id },
       {
         balance: user.balance + createTransDto.sum,
-        $push: {
-          transactions: [
-            {
-              from: 'System',
-              to: createTransDto.id,
-              value: createTransDto.sum,
-              date: new Date(),
-              comment:
-                createTransDto.comment === ''
-                  ? createTransDto.sum < 0
-                    ? 'Outcome'
-                    : 'Income'
-                  : createTransDto.comment,
-            },
-          ],
-        },
       },
     );
+    await this.transactionModel.create({
+      from: 'System',
+      to: createTransDto.id,
+      value: createTransDto.sum,
+      balance: user.balance + createTransDto.sum,
+      date: new Date(),
+      comment:
+        createTransDto.comment === ''
+          ? createTransDto.sum < 0
+            ? 'Outcome'
+            : 'Income'
+          : createTransDto.comment,
+    });
 
     return;
   }
@@ -98,20 +98,20 @@ export class BalanceService {
       await this.balanceModel.create({
         id: createC2CTransDto.id,
         balance: createC2CTransDto.sum,
-        transactions: [
-          {
-            from: createC2CTransDto.from,
-            to: createC2CTransDto.id,
-            value: createC2CTransDto.sum,
-            date: new Date(),
-            comment:
-              createC2CTransDto.comment === ''
-                ? createC2CTransDto.sum < 0
-                  ? 'Outcome'
-                  : 'Income'
-                : createC2CTransDto.comment,
-          },
-        ],
+      });
+
+      await this.transactionModel.create({
+        from: createC2CTransDto.from,
+        to: createC2CTransDto.id,
+        value: createC2CTransDto.sum,
+        balance: createC2CTransDto.sum,
+        date: new Date(),
+        comment:
+          createC2CTransDto.comment === ''
+            ? createC2CTransDto.sum < 0
+              ? 'Outcome'
+              : 'Income'
+            : createC2CTransDto.comment,
       });
 
       return;
@@ -125,24 +125,23 @@ export class BalanceService {
       { id: createC2CTransDto.id },
       {
         balance: user.balance + createC2CTransDto.sum,
-        $push: {
-          transactions: [
-            {
-              from: createC2CTransDto.from,
-              to: createC2CTransDto.id,
-              value: createC2CTransDto.sum,
-              date: new Date(),
-              comment:
-                createC2CTransDto.comment === '' || null || undefined
-                  ? createC2CTransDto.sum < 0
-                    ? 'Outcome'
-                    : 'Income'
-                  : createC2CTransDto.comment,
-            },
-          ],
-        },
       },
     );
+    // console.log(createC2CTransDto.from);
+
+    await this.transactionModel.create({
+      from: createC2CTransDto.from,
+      to: createC2CTransDto.id,
+      value: createC2CTransDto.sum,
+      balance: user.balance + createC2CTransDto.sum,
+      date: new Date(),
+      comment:
+        createC2CTransDto.comment === ''
+          ? createC2CTransDto.sum < 0
+            ? 'Outcome'
+            : 'Income'
+          : createC2CTransDto.comment,
+    });
 
     return;
   }
@@ -170,7 +169,23 @@ export class BalanceService {
     };
   }
 
-  async getTrans(id: string) {
-    return `This action returns a #${id} balance`;
+  async getTrans(id: string, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    const transactions = await this.transactionModel
+      .find(
+        {
+          id,
+        },
+        // { $match: 'transactions' },
+        '',
+        {
+          skip,
+          limit: +limit,
+        },
+      )
+      .sort({ date: -1, value: -1 });
+
+    return transactions;
   }
 }
