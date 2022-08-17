@@ -1,13 +1,13 @@
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model } from 'mongoose';
-import { BalanceService } from './balance.service';
+import { BalanceService } from '../balance.service';
 import {
   Balance,
   balanceDocument,
   balanceSchema,
-} from './schemas/balance.schema';
-import { Transaction, transactionSchema } from './schemas/transactons.schema';
+} from '../schemas/balance.schema';
+import { Transaction, transactionSchema } from '../schemas/transactons.schema';
 
 describe('BalanceService', () => {
   let service: BalanceService;
