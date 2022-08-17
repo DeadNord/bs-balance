@@ -14,7 +14,7 @@ export class BalanceController {
   @ApiOperation({ summary: 'Create Transaction' })
   @Post()
   async createTrans(@Body() createTransDto: CreateTransDto) {
-    return this.balanceService.createTrans(createTransDto);
+    return await this.balanceService.createTrans(createTransDto);
   }
 
   @ApiOperation({ summary: 'Create C2C Transaction' })

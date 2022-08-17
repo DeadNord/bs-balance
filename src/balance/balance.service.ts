@@ -49,7 +49,11 @@ export class BalanceService {
         //     : `Income from a BeSocial in sum ${createTransDto.sum}`
         //   : createTransDto.comment,
       });
-      return;
+      return {
+        from: 'BeSocial',
+        to: createTransDto.id,
+        value: createTransDto.sum,
+      };
     }
 
     if (user.balance + createTransDto.sum < 0) {
@@ -79,7 +83,11 @@ export class BalanceService {
       //   : createTransDto.comment,
     });
 
-    return;
+    return {
+      from: 'BeSocial',
+      to: createTransDto.id,
+      value: createTransDto.sum,
+    };
   }
 
   async createC2CTrans(createC2CTransDto: CreateC2CTransDto) {
@@ -120,7 +128,11 @@ export class BalanceService {
         //   : createC2CTransDto.comment,
       });
 
-      return;
+      return {
+        from: createC2CTransDto.from,
+        to: createC2CTransDto.id,
+        value: createC2CTransDto.sum,
+      };
     }
 
     if (user.balance + createC2CTransDto.sum < 0) {
@@ -152,7 +164,11 @@ export class BalanceService {
       //   : createC2CTransDto.comment,
     });
 
-    return;
+    return {
+      from: createC2CTransDto.from,
+      to: createC2CTransDto.id,
+      value: createC2CTransDto.sum,
+    };
   }
 
   async getBalance(id: string, currencyDto: CurrencyDto) {
@@ -172,7 +188,7 @@ export class BalanceService {
 
       return {
         balance: exchange,
-        currency: currencyDto,
+        currency: String(currencyDto),
       };
     }
 
