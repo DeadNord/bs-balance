@@ -1,12 +1,22 @@
 import axios from 'axios';
+import { CurrencyDto } from '../dto/currency.dto';
 
-export const getCoursesService = async () => {
+// For You :)
+// Instead of ENV
+const EXCHANGE_RATES_API_KEY = '10911728664e4bc49031b27ca146ca51';
+
+export const getCoursesService = async (
+  base: string,
+  currency: CurrencyDto,
+) => {
   const courses = await axios
-    .get('https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11')
+    .get(
+      `https://exchange-rates.abstractapi.com/v1/live/?api_key=${EXCHANGE_RATES_API_KEY}&base=${base}&target=${currency}`,
+    )
     .then(res => res.data)
-    .catch(function (error) {
-      // handle error
-      console.log(error);
+    .catch(error => {
+      //   console.log(error);
+      return error.code;
     });
   return courses;
 };

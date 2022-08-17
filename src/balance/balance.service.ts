@@ -4,11 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { log } from 'console';
 import { Model } from 'mongoose';
-import { CreateC2CTransDto } from './dto/create-c2c-trans.dto copy';
+import { CreateC2CTransDto } from './dto/create-c2c-trans.dto';
 import { CreateTransDto } from './dto/create-trans.dto';
-import { PaginateDto } from './dto/paginate.dto';
+import { CurrencyDto } from './dto/currency.dto';
 import { getCoursesService } from './helpers/getCoursesService';
 import { Balance, balanceDocument } from './schemas/balance.schema';
 import { Transaction, transactionDocument } from './schemas/transactons.schema';
@@ -35,17 +34,20 @@ export class BalanceService {
       });
 
       await this.transactionModel.create({
-        from: 'System',
+        from: 'BeSocial',
         to: createTransDto.id,
         value: createTransDto.sum,
         balance: createTransDto.sum,
         date: new Date(),
         comment:
-          createTransDto.comment === ''
-            ? createTransDto.sum < 0
-              ? 'Outcome'
-              : 'Income'
-            : createTransDto.comment,
+          createTransDto.sum < 0
+            ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
+            : `Income from a BeSocial in sum ${createTransDto.sum}`,
+        // createTransDto.comment === '' || createTransDto.comment === undefined
+        //   ? createTransDto.sum < 0
+        //     ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
+        //     : `Income from a BeSocial in sum ${createTransDto.sum}`
+        //   : createTransDto.comment,
       });
       return;
     }
@@ -61,17 +63,20 @@ export class BalanceService {
       },
     );
     await this.transactionModel.create({
-      from: 'System',
+      from: 'BeSocial',
       to: createTransDto.id,
       value: createTransDto.sum,
       balance: user.balance + createTransDto.sum,
       date: new Date(),
       comment:
-        createTransDto.comment === ''
-          ? createTransDto.sum < 0
-            ? 'Outcome'
-            : 'Income'
-          : createTransDto.comment,
+        createTransDto.sum < 0
+          ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
+          : `Income from a BeSocial in sum ${createTransDto.sum}`,
+      // createTransDto.comment === '' || createTransDto.comment === undefined
+      //   ? createTransDto.sum < 0
+      //     ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
+      //     : `Income from a BeSocial in sum ${createTransDto.sum}`
+      //   : createTransDto.comment,
     });
 
     return;
@@ -86,12 +91,9 @@ export class BalanceService {
     //   throw new BadRequestException(`Invalid sender name`);
     // }
 
-    // console.log('YY');
-
     const user = await this.balanceModel.findOne({ id: createC2CTransDto.id });
 
     if (!user) {
-      // console.log('YY');
       if (createC2CTransDto.sum < 0) {
         throw new BadRequestException(`Insufficient funds on the account`);
       }
@@ -107,11 +109,15 @@ export class BalanceService {
         balance: createC2CTransDto.sum,
         date: new Date(),
         comment:
-          createC2CTransDto.comment === ''
-            ? createC2CTransDto.sum < 0
-              ? 'Outcome'
-              : 'Income'
-            : createC2CTransDto.comment,
+          createC2CTransDto.sum < 0
+            ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+            : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`,
+        // createC2CTransDto.comment === '' ||
+        // createC2CTransDto.comment === undefined
+        //   ? createC2CTransDto.sum < 0
+        //     ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+        //     : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+        //   : createC2CTransDto.comment,
       });
 
       return;
@@ -127,7 +133,6 @@ export class BalanceService {
         balance: user.balance + createC2CTransDto.sum,
       },
     );
-    // console.log(createC2CTransDto.from);
 
     await this.transactionModel.create({
       from: createC2CTransDto.from,
@@ -136,36 +141,44 @@ export class BalanceService {
       balance: user.balance + createC2CTransDto.sum,
       date: new Date(),
       comment:
-        createC2CTransDto.comment === ''
-          ? createC2CTransDto.sum < 0
-            ? 'Outcome'
-            : 'Income'
-          : createC2CTransDto.comment,
+        createC2CTransDto.sum < 0
+          ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+          : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`,
+      // createC2CTransDto.comment === '' ||
+      // createC2CTransDto.comment === undefined
+      //   ? createC2CTransDto.sum < 0
+      //     ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+      //     : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
+      //   : createC2CTransDto.comment,
     });
 
     return;
   }
 
-  async getBalance(id: string, currency: string) {
+  async getBalance(id: string, currencyDto: CurrencyDto) {
     const user = await this.balanceModel.findOne({ id });
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     }
-    if (currency !== undefined || currency !== null) {
-      const courses = await getCoursesService();
-      const targetCourses = courses.find(i => i.ccy === currency);
 
-      const balance = user.balance / targetCourses.buy;
+    if (currencyDto !== undefined) {
+      const res = await getCoursesService('USD', currencyDto);
+      if (res === 'ERR_BAD_REQUEST') {
+        throw new BadRequestException(`Currency ${currencyDto} not found`);
+      }
+
+      const courses = res.exchange_rates[String(currencyDto)];
+      const exchange = user.balance * courses;
 
       return {
-        balance: balance,
-        currency: currency,
+        balance: exchange,
+        currency: currencyDto,
       };
     }
 
     return {
       balance: user.balance,
-      currency: 'UAH',
+      currency: 'USD',
     };
   }
 
@@ -177,7 +190,6 @@ export class BalanceService {
         {
           id,
         },
-        // { $match: 'transactions' },
         '',
         {
           skip,

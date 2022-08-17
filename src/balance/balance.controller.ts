@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BalanceService } from './balance.service';
-import { CreateC2CTransDto } from './dto/create-c2c-trans.dto copy';
+import { CreateC2CTransDto } from './dto/create-c2c-trans.dto';
 import { CreateTransDto } from './dto/create-trans.dto';
+import { CurrencyDto } from './dto/currency.dto';
 import { PaginateDto } from './dto/paginate.dto';
 
 @ApiTags('balance')
@@ -26,10 +27,8 @@ export class BalanceController {
   @Get('/user-balance/:id')
   async getBalance(
     @Param('id') id: string,
-    @Query('currency') currency: string,
+    @Query('currency') currency: CurrencyDto,
   ) {
-    // console.log(id, currency);
-
     return this.balanceService.getBalance(id, currency);
   }
 

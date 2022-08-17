@@ -21,12 +21,4 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
-
-  it('Create Trans', () => {
-    return request(app.getHttpServer())
-      .post('/')
-
-      .expect(200)
-      .expect('Hello World!');
-  });
 });
