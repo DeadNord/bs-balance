@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { log } from 'console';
 import { Model } from 'mongoose';
 import { CreateC2CTransDto } from './dto/create-c2c-trans.dto copy';
 import { CreateTransDto } from './dto/create-trans.dto';
+import { getCoursesService } from './helpers/getCoursesService';
 import { Balance, balanceDocument } from './schemas/balance.schema';
 
 @Injectable()
@@ -142,8 +147,27 @@ export class BalanceService {
     return;
   }
 
-  async getBalance(id: string) {
-    return `This action returns all balance`;
+  async getBalance(id: string, currency: string) {
+    const user = await this.balanceModel.findOne({ id });
+    if (!user) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+    if (currency !== undefined || currency !== null) {
+      const courses = await getCoursesService();
+      const targetCourses = courses.find(i => i.ccy === currency);
+
+      const balance = user.balance / targetCourses.buy;
+
+      return {
+        balance: balance,
+        currency: currency,
+      };
+    }
+
+    return {
+      balance: user.balance,
+      currency: 'UAH',
+    };
   }
 
   async getTrans(id: string) {
