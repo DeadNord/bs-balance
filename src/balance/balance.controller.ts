@@ -14,7 +14,7 @@ export class BalanceController {
   @ApiOperation({ summary: 'Create Transaction' })
   @Post()
   async createTrans(@Body() createTransDto: CreateTransDto) {
-    return this.balanceService.createTrans(createTransDto);
+    return await this.balanceService.createTrans(createTransDto);
   }
 
   @ApiOperation({ summary: 'Create C2C Transaction' })
@@ -27,13 +27,13 @@ export class BalanceController {
   @Get('/user-balance/:id')
   async getBalance(
     @Param('id') id: string,
-    @Query('currency') currency: CurrencyDto,
+    @Query('currency') currencyDto: CurrencyDto,
   ) {
-    return this.balanceService.getBalance(id, currency);
+    return this.balanceService.getBalance(id, currencyDto);
   }
 
   @ApiOperation({ summary: 'get All User Transactions' })
-  @Get('/transactions:id')
+  @Get('/transactions/:id')
   async getTrans(@Param('id') id: string, @Query() params: PaginateDto) {
     return this.balanceService.getTrans(id, params.page, params.limit);
   }

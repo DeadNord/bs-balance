@@ -3,7 +3,7 @@ import { BalanceService } from './balance.service';
 import { BalanceController } from './balance.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Balance, balanceSchema } from './schemas/balance.schema';
-import { Transaction, transactionSchema } from './schemas/transactons.schema';
+import { Transaction, transactionSchema } from './schemas/transaction.schema';
 
 @Module({
   imports: [

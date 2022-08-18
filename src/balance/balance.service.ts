@@ -10,7 +10,7 @@ import { CreateTransDto } from './dto/create-trans.dto';
 import { CurrencyDto } from './dto/currency.dto';
 import { getCoursesService } from './helpers/getCoursesService';
 import { Balance, balanceDocument } from './schemas/balance.schema';
-import { Transaction, transactionDocument } from './schemas/transactons.schema';
+import { Transaction, transactionDocument } from './schemas/transaction.schema';
 
 @Injectable()
 export class BalanceService {
@@ -49,7 +49,11 @@ export class BalanceService {
         //     : `Income from a BeSocial in sum ${createTransDto.sum}`
         //   : createTransDto.comment,
       });
-      return;
+      return {
+        from: 'BeSocial',
+        to: createTransDto.id,
+        value: createTransDto.sum,
+      };
     }
 
     if (user.balance + createTransDto.sum < 0) {
@@ -79,7 +83,11 @@ export class BalanceService {
       //   : createTransDto.comment,
     });
 
-    return;
+    return {
+      from: 'BeSocial',
+      to: createTransDto.id,
+      value: createTransDto.sum,
+    };
   }
 
   async createC2CTrans(createC2CTransDto: CreateC2CTransDto) {
@@ -120,7 +128,11 @@ export class BalanceService {
         //   : createC2CTransDto.comment,
       });
 
-      return;
+      return {
+        from: createC2CTransDto.from,
+        to: createC2CTransDto.id,
+        value: createC2CTransDto.sum,
+      };
     }
 
     if (user.balance + createC2CTransDto.sum < 0) {
@@ -152,7 +164,11 @@ export class BalanceService {
       //   : createC2CTransDto.comment,
     });
 
-    return;
+    return {
+      from: createC2CTransDto.from,
+      to: createC2CTransDto.id,
+      value: createC2CTransDto.sum,
+    };
   }
 
   async getBalance(id: string, currencyDto: CurrencyDto) {
@@ -171,12 +187,14 @@ export class BalanceService {
       const exchange = user.balance * courses;
 
       return {
+        id: user.id,
         balance: exchange,
-        currency: currencyDto,
+        currency: String(currencyDto),
       };
     }
 
     return {
+      id: user.id,
       balance: user.balance,
       currency: 'USD',
     };
@@ -188,7 +206,7 @@ export class BalanceService {
     const transactions = await this.transactionModel
       .find(
         {
-          id,
+          to: id,
         },
         '',
         {
@@ -197,6 +215,10 @@ export class BalanceService {
         },
       )
       .sort({ date: -1, value: -1 });
+
+    if (!transactions || transactions.length === 0) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
 
     return transactions;
   }
