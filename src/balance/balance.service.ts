@@ -10,7 +10,7 @@ import { CreateTransDto } from './dto/create-trans.dto';
 import { CurrencyDto } from './dto/currency.dto';
 import { getCoursesService } from './helpers/getCoursesService';
 import { Balance, balanceDocument } from './schemas/balance.schema';
-import { Transaction, transactionDocument } from './schemas/transactons.schema';
+import { Transaction, transactionDocument } from './schemas/transaction.schema';
 
 @Injectable()
 export class BalanceService {
@@ -187,12 +187,14 @@ export class BalanceService {
       const exchange = user.balance * courses;
 
       return {
+        id: user.id,
         balance: exchange,
         currency: String(currencyDto),
       };
     }
 
     return {
+      id: user.id,
       balance: user.balance,
       currency: 'USD',
     };
@@ -204,7 +206,7 @@ export class BalanceService {
     const transactions = await this.transactionModel
       .find(
         {
-          id,
+          to: id,
         },
         '',
         {
@@ -213,6 +215,10 @@ export class BalanceService {
         },
       )
       .sort({ date: -1, value: -1 });
+
+    if (!transactions || transactions.length === 0) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
 
     return transactions;
   }
