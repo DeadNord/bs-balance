@@ -21,6 +21,25 @@ export class BalanceService {
     private transactionModel: Model<transactionDocument>,
   ) {}
 
+  addTransaction = (id, sum, balance = sum, from = 'BeSocial') => {
+    this.transactionModel.create({
+      from: from,
+      to: id,
+      value: sum,
+      balance: balance,
+      date: new Date(),
+      comment:
+        sum < 0
+          ? `Outcome on a BeSocial in sum ${sum}`
+          : `Income from a BeSocial in sum ${sum}`,
+      // createTransDto.comment === '' || createTransDto.comment === undefined
+      //   ? createTransDto.sum < 0
+      //     ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
+      //     : `Income from a BeSocial in sum ${createTransDto.sum}`
+      //   : createTransDto.comment,
+    });
+  };
+
   async createTrans(createTransDto: CreateTransDto) {
     const user = await this.balanceModel.findOne({ id: createTransDto.id });
 
@@ -33,22 +52,7 @@ export class BalanceService {
         balance: createTransDto.sum,
       });
 
-      await this.transactionModel.create({
-        from: 'BeSocial',
-        to: createTransDto.id,
-        value: createTransDto.sum,
-        balance: createTransDto.sum,
-        date: new Date(),
-        comment:
-          createTransDto.sum < 0
-            ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
-            : `Income from a BeSocial in sum ${createTransDto.sum}`,
-        // createTransDto.comment === '' || createTransDto.comment === undefined
-        //   ? createTransDto.sum < 0
-        //     ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
-        //     : `Income from a BeSocial in sum ${createTransDto.sum}`
-        //   : createTransDto.comment,
-      });
+      this.addTransaction(createTransDto.id, createTransDto.sum);
       return {
         from: 'BeSocial',
         to: createTransDto.id,
@@ -66,22 +70,12 @@ export class BalanceService {
         balance: user.balance + createTransDto.sum,
       },
     );
-    await this.transactionModel.create({
-      from: 'BeSocial',
-      to: createTransDto.id,
-      value: createTransDto.sum,
-      balance: user.balance + createTransDto.sum,
-      date: new Date(),
-      comment:
-        createTransDto.sum < 0
-          ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
-          : `Income from a BeSocial in sum ${createTransDto.sum}`,
-      // createTransDto.comment === '' || createTransDto.comment === undefined
-      //   ? createTransDto.sum < 0
-      //     ? `Outcome on a BeSocial in sum ${createTransDto.sum}`
-      //     : `Income from a BeSocial in sum ${createTransDto.sum}`
-      //   : createTransDto.comment,
-    });
+
+    this.addTransaction(
+      createTransDto.id,
+      createTransDto.sum,
+      user.balance + createTransDto.sum,
+    );
 
     return {
       from: 'BeSocial',
@@ -110,23 +104,12 @@ export class BalanceService {
         balance: createC2CTransDto.sum,
       });
 
-      await this.transactionModel.create({
-        from: createC2CTransDto.from,
-        to: createC2CTransDto.id,
-        value: createC2CTransDto.sum,
-        balance: createC2CTransDto.sum,
-        date: new Date(),
-        comment:
-          createC2CTransDto.sum < 0
-            ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-            : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`,
-        // createC2CTransDto.comment === '' ||
-        // createC2CTransDto.comment === undefined
-        //   ? createC2CTransDto.sum < 0
-        //     ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-        //     : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-        //   : createC2CTransDto.comment,
-      });
+      this.addTransaction(
+        createC2CTransDto.id,
+        createC2CTransDto.sum,
+        undefined,
+        createC2CTransDto.from,
+      );
 
       return {
         from: createC2CTransDto.from,
@@ -146,23 +129,12 @@ export class BalanceService {
       },
     );
 
-    await this.transactionModel.create({
-      from: createC2CTransDto.from,
-      to: createC2CTransDto.id,
-      value: createC2CTransDto.sum,
-      balance: user.balance + createC2CTransDto.sum,
-      date: new Date(),
-      comment:
-        createC2CTransDto.sum < 0
-          ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-          : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`,
-      // createC2CTransDto.comment === '' ||
-      // createC2CTransDto.comment === undefined
-      //   ? createC2CTransDto.sum < 0
-      //     ? `Outcome on a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-      //     : `Income from a ${createC2CTransDto.from} in sum ${createC2CTransDto.sum}`
-      //   : createC2CTransDto.comment,
-    });
+    this.addTransaction(
+      createC2CTransDto.id,
+      createC2CTransDto.sum,
+      user.balance + createC2CTransDto.sum,
+      createC2CTransDto.from,
+    );
 
     return {
       from: createC2CTransDto.from,
