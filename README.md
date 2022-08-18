@@ -1,4 +1,4 @@
-.env.example Содержит шаблон который нужно заполнить перед запуском. 
+.env.example Содержит шаблон который нужно заполнить перед запуском.
 
 Link on a Swagger: http://localhost:3001/docs/swagger/
 
